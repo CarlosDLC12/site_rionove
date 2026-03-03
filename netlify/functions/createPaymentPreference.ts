@@ -212,11 +212,6 @@ ID Temp: \`${saleRef.id}\``;
                 email: customer.email,
                 name: customer.name,
             },
-            payment_methods: {
-                excluded_payment_types: [
-                    { id: "ticket" } // Exclude boleto
-                ]
-            },
             external_reference: saleRef.id,
             back_urls: {
                 success: `${baseUrl}/success`,

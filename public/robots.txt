@@ -1,0 +1,19 @@
+# Robots.txt para RioNove - Porto Velho
+# Permite indexação de páginas públicas e bloqueia áreas privadas
+
+User-agent: *
+Allow: /
+Allow: /product/
+Allow: /about
+
+# Bloquear páginas de checkout e carrinho (não relevantes para SEO)
+Disallow: /cart
+Disallow: /checkout
+Disallow: /success
+
+# Bloquear assets desnecessários
+Disallow: /*.json$
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://rionove.com.br/sitemap.xml

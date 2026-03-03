@@ -8,6 +8,8 @@ interface CartState {
     removeItem: (productId: string, selectedColor?: string) => void;
     updateQuantity: (productId: string, quantity: number, selectedColor?: string) => void;
     clearCart: () => void;
+    subtotal: () => number;
+    comboDiscount: () => number;
     total: () => number;
 }
 
@@ -46,11 +48,23 @@ export const useCartStore = create<CartState>()(
                 }
             },
             clearCart: () => set({ items: [] }),
-            total: () => {
+            subtotal: () => {
                 return get().items.reduce(
                     (acc, item) => acc + item.price * item.quantity,
                     0
                 );
+            },
+            comboDiscount: () => {
+                const items = get().items;
+                const hasSmartwatch = items.some(i => i.category === 'Smartwatch');
+                const hasAccessory = items.some(i => i.category === 'Acessórios');
+                if (hasSmartwatch && hasAccessory) {
+                    return get().subtotal() * 0.05; // 5% off the entire cart subtotal
+                }
+                return 0;
+            },
+            total: () => {
+                return get().subtotal() - get().comboDiscount();
             },
         }),
         {

@@ -15,7 +15,7 @@ export const TrustSection = () => {
         {
             icon: <CreditCard className="w-7 h-7" />,
             title: "Pagamento Seguro",
-            desc: "Pague na entrega (Pix ou Cartão). Zero risco para você."
+            desc: "Pague com Pix ou Cartão de forma 100% segura. Zero risco para você."
         },
         {
             icon: <ShieldCheck className="w-7 h-7" />,

@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { getAllNeighborhoods, getShippingCost } from '../data/shipping';
 import { SearchableSelect } from '../components/ui/SearchableSelect';
 export const Checkout = () => {
-    const { items, total, clearCart } = useCartStore();
+    const { items, total, subtotal, comboDiscount, clearCart } = useCartStore();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -76,7 +76,8 @@ export const Checkout = () => {
                 // Prepare items payload mapping to what the Cloud Function expects
                 const payloadItems = items.map(item => ({
                     id: item.id,
-                    quantity: item.quantity
+                    quantity: item.quantity,
+                    selectedColor: item.selectedColor
                 }));
 
                 const response = await fetch("/.netlify/functions/createPaymentPreference", {
@@ -125,12 +126,17 @@ export const Checkout = () => {
             const totalFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total() + shippingCost);
             const shippingFormatted = shippingCost === 0 ? 'Grátis (Retirada)' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(shippingCost);
 
-            const message = `*NOVO PEDIDO RIONOVE*%0A%0A` +
+            let message = `*NOVO PEDIDO RIONOVE*%0A%0A` +
                 `*Cliente:* ${encodeURIComponent(sanitizedData.name)}%0A` +
                 `*Telefone:* ${encodeURIComponent(sanitizedData.phone)}%0A` +
                 `*Endereço:* ${encodeURIComponent(sanitizedData.address)}, ${encodeURIComponent(sanitizedData.number)} - ${encodeURIComponent(sanitizedData.neighborhood)}%0A%0A` +
-                `*Itens:*%0A${itemsList}%0A` +
-                `*Frete:* ${encodeURIComponent(shippingFormatted)}%0A%0A` +
+                `*Itens:*%0A${itemsList}%0A`;
+
+            if (comboDiscount() > 0) {
+                message += `*Desconto Combo:* -${encodeURIComponent(new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(comboDiscount()))}%0A`;
+            }
+
+            message += `*Frete:* ${encodeURIComponent(shippingFormatted)}%0A%0A` +
                 `*Total:* ${totalFormatted}%0A` +
                 `*Pagamento:* Dinheiro (Retirada/Entrega)`;
 
@@ -298,8 +304,14 @@ export const Checkout = () => {
                                 <div className="border-t border-gray-100 pt-3 mb-4 space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Subtotal</span>
-                                        <span className="font-medium">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total())}</span>
+                                        <span className="font-medium">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(subtotal())}</span>
                                     </div>
+                                    {comboDiscount() > 0 && (
+                                        <div className="flex justify-between text-sm text-emerald-600 font-medium">
+                                            <span>Desconto Combo</span>
+                                            <span>-{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(comboDiscount())}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Frete ({formData.neighborhood})</span>
                                         <span className="font-medium">{shippingCost === 0 ? 'Grátis' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(shippingCost)}</span>

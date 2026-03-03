@@ -379,7 +379,7 @@ export const ProductDetails = () => {
                                         </div>
                                         <div className="text-center">
                                             <CreditCard className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                                            <span className="text-[10px] text-gray-500 uppercase font-bold block">Pague na Entrega</span>
+                                            <span className="text-[10px] text-gray-500 uppercase font-bold block">100% Seguro</span>
                                         </div>
                                     </div>
                                 </div>

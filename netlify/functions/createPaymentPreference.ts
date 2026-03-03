@@ -82,8 +82,11 @@ export const handler: Handler = async (event) => {
         }
 
         const preferenceItems: any[] = [];
+        const fetchedProducts = [];
+        let hasSmartwatch = false;
+        let hasAccessory = false;
 
-        // Calculate real price fetching from Firestore Server-side
+        // Fetch all products to verify data and check combo rules
         for (const item of items) {
             const productRef = db.collection("products").doc(item.id);
             const productSnap = await productRef.get();
@@ -106,7 +109,17 @@ export const handler: Handler = async (event) => {
                 return { statusCode: 404, headers, body: JSON.stringify({ error: `Product ${item.id} data is invalid` }) };
             }
 
-            let availableStock = productData.stock || 0;
+            if (productData.category === 'Smartwatch') hasSmartwatch = true;
+            if (productData.category === 'Acessórios') hasAccessory = true;
+
+            fetchedProducts.push({ item, productData });
+        }
+
+        const applyComboDiscount = hasSmartwatch && hasAccessory;
+
+        // Process preference items and apply discount if combo exists
+        for (const { item, productData } of fetchedProducts) {
+            let availableStock = productData.stock !== undefined ? productData.stock : 9999;
             let titleWithColor = (productData as any).name || productData.title;
 
             if (item.selectedColor && productData.variants) {
@@ -122,15 +135,21 @@ export const handler: Handler = async (event) => {
                 return { statusCode: 400, headers, body: JSON.stringify({ error: `Insufficient stock for product ${titleWithColor}` }) };
             }
 
+            let unitPrice = Number(productData.price);
+            if (applyComboDiscount) {
+                // Apply 5% discount proportionally to each item
+                unitPrice = Number((unitPrice * 0.95).toFixed(2));
+            }
+
             preferenceItems.push({
                 id: item.id,
-                title: titleWithColor,
+                title: applyComboDiscount ? `${titleWithColor} (Combo 5% OFF)` : titleWithColor,
                 description: item.selectedColor ? `Cor/Variação: ${item.selectedColor}` : (productData.description || ""),
                 picture_url: productData.images ? productData.images[0] : "",
                 category_id: productData.category || "electronics",
                 quantity: item.quantity,
                 currency_id: "BRL",
-                unit_price: Number(productData.price),
+                unit_price: unitPrice,
             });
         }
 

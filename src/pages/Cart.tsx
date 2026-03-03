@@ -5,7 +5,7 @@ import { useCartStore } from '../lib/store';
 import { Layout } from '../components/layout/Layout';
 
 export const Cart = () => {
-    const { items, removeItem, updateQuantity, total } = useCartStore();
+    const { items, removeItem, updateQuantity, total, subtotal, comboDiscount } = useCartStore();
     const navigate = useNavigate();
 
     if (items.length === 0) {
@@ -89,8 +89,14 @@ export const Cart = () => {
                                 <div className="space-y-4 mb-6 border-b border-gray-100 pb-6">
                                     <div className="flex justify-between text-gray-600">
                                         <span>Subtotal</span>
-                                        <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(total())}</span>
+                                        <span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(subtotal())}</span>
                                     </div>
+                                    {comboDiscount() > 0 && (
+                                        <div className="flex justify-between text-emerald-600 font-medium bg-emerald-50 -mx-4 px-4 py-2 rounded-lg">
+                                            <span>Desconto Combo (5%)</span>
+                                            <span>-{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(comboDiscount())}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between text-gray-600">
                                         <span>Entrega</span>
                                         <span className="text-xs text-gray-400">(Calculado no checkout)</span>
